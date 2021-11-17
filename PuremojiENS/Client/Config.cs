@@ -4,6 +4,7 @@
     {
         public COpenSea OpenSea { get; set; }
         public CENS ENS { get; set; }
+        public decimal EthDivisor { get; set; }
     }
     
     public class COpenSea
@@ -20,5 +21,6 @@
     {
         public string PuremojisEndpoint { get; set; }
         public string ValidTokenIdsEndpoint { get; set; }
+        public string AuctionsEndpoint { get; set; }
     }
 }

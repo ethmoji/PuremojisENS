@@ -8,6 +8,7 @@ appsettings.local.json
 out/
 log/
 deploy.sh
+getdb.sh
 
 # Build results
 

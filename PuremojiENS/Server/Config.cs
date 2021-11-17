@@ -27,5 +27,6 @@
     {
         public string GetAssetEndpoint { get; set; }
         public string GetAssetsEndpoint { get; set; }
+        public string EventsEndpoint { get; set; }
     }
 }

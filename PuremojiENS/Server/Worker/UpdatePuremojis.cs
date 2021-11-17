@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PuremojiENS.Server.APIs.OpenSea;
 using PuremojiENS.Server.APIs.TheGraph;
+using PuremojiENS.Server.Directory;
 using PuremojiENS.Shared;
 
 namespace PuremojiENS.Server.Worker
@@ -17,18 +19,18 @@ namespace PuremojiENS.Server.Worker
     public class UpdatePuremojis : IHostedService, IDisposable
     {
         private readonly ILogger<UpdatePuremojis> _logger;
+        private readonly EmojisDbContext _dbContext;
         private readonly Config _config;
         private readonly TheGraph _theGraph;
-        private readonly List<Emoji> _puremojis;
         private readonly OpenSea _openSea;
         private Timer _timer = null!;
 
-        public UpdatePuremojis(ILogger<UpdatePuremojis> logger, Config config, TheGraph theGraph, List<Emoji> puremoji, OpenSea openSea)
+        public UpdatePuremojis(ILogger<UpdatePuremojis> logger, EmojisDbContext dbContext, Config config, TheGraph theGraph, OpenSea openSea)
         {
             _logger = logger;
+            _dbContext = dbContext;
             _config = config;
             _theGraph = theGraph;
-            _puremojis = puremoji;
             _openSea = openSea;
         }
 
@@ -36,6 +38,14 @@ namespace PuremojiENS.Server.Worker
         {
             _logger.LogInformation("UpdatePureTriples Service running.");
 
+            foreach(var emoji in _dbContext.Emojis)
+            {
+                if(DateTime.Now > emoji.AuctionEnd)
+                {
+                    emoji.AuctionEnd = null;
+                }
+            }
+            
             _timer = new Timer(DoWork, null, TimeSpan.Zero,
                 TimeSpan.FromSeconds(_config.UpdateCooldown));
 
@@ -44,49 +54,83 @@ namespace PuremojiENS.Server.Worker
 
         private async void DoWork(object? state)
         {
-            _logger.LogInformation("Updating puremojis");
-
-            foreach (var emoji in _puremojis)
+            var events = await _openSea.GetEvents(_config.UpdateCooldown / 60);
+            if(events != null)
             {
-                if (!emoji.Registered)
+                foreach (var e in events.asset_events)
                 {
-                    _logger.LogInformation(emoji.Name);
-                    var registered = await _theGraph.IsRegistered(emoji.TokenIdHex);
-                    emoji.Registered = registered;
-                }
-            }
-            _logger.LogInformation("Done updating registration");
-
-            for (int i = 0; i < _puremojis.Count; i += 30)
-            {
-                var elements = _puremojis.Count - i >= 30 ? 30 : _puremojis.Count - i;
-                _logger.LogInformation($"[{i},{i + elements}]");
-                var next = _puremojis.GetRange(i, elements);
-                var assets = await _openSea.GetAssets(next.Select(x => x.TokenId).ToList());
-                foreach (var asset in assets.assets)
-                {
-                    if (asset != null)
+                    if(e.asset != null && e.asset.token_id != null)
                     {
-                        if (asset.last_sale != null && !string.IsNullOrEmpty(asset.last_sale.total_price))
+                        var emoji = _dbContext.Emojis.FirstOrDefault(x => x.TokenId == e.asset.token_id);
+                        if (emoji != null)
                         {
-                            foreach (var n in next)
+                            if (e.event_type == "created" && e.auction_type != null && e.auction_type== "english")
                             {
-                                if (n.TokenId.Equals(asset.token_id))
-                                {
-                                    n.LastSale = decimal.Parse(asset.last_sale.total_price) / _config.EthDivisor;
-                                    _logger.LogInformation($"Last Sale of {n.TokenId}: {n.LastSale} ETH");
-                                }
+                                emoji.AuctionEnd = e.created_date.AddSeconds(int.Parse(e.duration));
+                                _logger.LogInformation($"Created for {e.asset.permalink}");
+                            }
+                            else if (e.event_type == "cancelled")
+                            {
+                                emoji.AuctionEnd = null;
+                                _logger.LogInformation($"Ended for {e.asset.permalink}");
+                            }
+                            else if (e.event_type == "successful")
+                            {
+                                emoji.LastSale = e.total_price;
+                                _logger.LogInformation($"Sale for {e.asset.permalink}");
                             }
                         }
                     }
                 }
-                Thread.Sleep(10000);
             }
 
-            _logger.LogInformation("Done updating last sales");
+            //var puremojis = _dbContext.Emojis.Where(x => !x.ContainsFE0F);
+            //var puremojisCount = puremojis.Count();
 
-            var json = JsonConvert.SerializeObject(_puremojis);
-            await File.WriteAllTextAsync(_config.PuremojisPath, json, Encoding.UTF8);
+            //foreach (var emoji in puremojis)
+            //{
+            //    if (!emoji.Registered)
+            //    {
+            //        _logger.LogInformation(emoji.Name);
+            //        var registered = await _theGraph.IsRegistered(emoji.TokenIdHex);
+            //        emoji.Registered = registered;
+            //    }
+            //}
+            //_logger.LogInformation("Done updating registration");
+
+
+            //for (int i = 0; i < puremojisCount; i += 30)
+            //{
+            //    var elements = puremojisCount - i >= 30 ? 30 : puremojisCount - i;
+            //    _logger.LogInformation($"[{i},{i + elements}]");
+            //    var next = puremojis.Take(elements);
+            //    var assets = await _openSea.GetAssets(next.Select(x => x.TokenId).ToList());
+            //    if (assets != null)
+            //    {
+            //        foreach (var asset in assets.assets)
+            //        {
+            //            if (asset != null)
+            //            {
+            //                if (asset.last_sale != null && !string.IsNullOrEmpty(asset.last_sale.total_price))
+            //                {
+            //                    foreach (var n in next)
+            //                    {
+            //                        if (n.TokenId.Equals(asset.token_id))
+            //                        {
+            //                            n.LastSale = asset.last_sale.total_price;
+            //                            _logger.LogInformation($"Last Sale of {n.TokenId}: {n.LastSale} ETH");
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //    Thread.Sleep(10000);
+            //}
+
+
+            //_dbContext.Emojis.UpdateRange(puremojis);
+            await _dbContext.SaveChangesAsync();
         }
 
         public Task StopAsync(CancellationToken stoppingToken)

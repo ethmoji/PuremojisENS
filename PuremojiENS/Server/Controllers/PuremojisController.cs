@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PuremojiENS.Server.Directory;
 using PuremojiENS.Shared;
 
 namespace PuremojiENS.Server.Controllers
@@ -8,16 +9,16 @@ namespace PuremojiENS.Server.Controllers
     public class PuremojisController : ControllerBase
     {
         private readonly ILogger<PuremojisController> _logger;
-        private readonly List<Emoji> _puremojis;
+        private readonly EmojisDbContext _dbContext;
 
-        public PuremojisController(ILogger<PuremojisController> logger, List<Emoji> puremojis)
+        public PuremojisController(ILogger<PuremojisController> logger, EmojisDbContext dbContext)
         {
             _logger = logger;
-            _puremojis = puremojis;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
-        public IEnumerable<Emoji> Get(string? filter, string? status)
+        public IEnumerable<Emoji> Get(string? filter)
         {
             _logger.LogInformation("Puremojis requested");
             
@@ -26,37 +27,13 @@ namespace PuremojiENS.Server.Controllers
             switch (filter)
             {
                 case "triples":
-                    switch(status)
-                    {
-                        case "registered":
-                            return _puremojis.Where(x => x.Registered && x.Width == 1);
-                        case "unregistered":
-                            return _puremojis.Where(x => !x.Registered && x.Width == 1);
-                        default:
-                            return _puremojis.Where(x => x.Width == 1);
-                    }
+                    return _dbContext.Emojis.Where(x => !x.ContainsFE0F && x.Width == 1);
                 case "doubles":
-                    switch (status)
-                    {
-                        case "registered":
-                            return _puremojis.Where(x => x.Registered && x.Width == 2);
-                        case "unregistered":
-                            return _puremojis.Where(x => !x.Registered && x.Width == 2);
-                        default:
-                            return _puremojis.Where(x => x.Width == 2);
-                    }
+                    return _dbContext.Emojis.Where(x => !x.ContainsFE0F && x.Width == 2);
                 case "singles":
-                    switch (status)
-                    {
-                        case "registered":
-                            return _puremojis.Where(x => x.Registered && x.Width >= 3);
-                        case "unregistered":
-                            return _puremojis.Where(x => !x.Registered && x.Width >= 3);
-                        default:
-                            return _puremojis.Where(x => x.Width >= 3);
-                    }
+                    return _dbContext.Emojis.Where(x => !x.ContainsFE0F && x.Width >= 3);
                 default:
-                    return _puremojis;
+                    return _dbContext.Emojis.Where(x => !x.ContainsFE0F);
             }
         }
     }

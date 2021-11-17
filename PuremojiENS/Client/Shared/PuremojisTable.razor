@@ -1,6 +1,5 @@
 ﻿@using BlazorTable
 @using System.ComponentModel
-@using PuremojiENS.Shared
 @using Microsoft.Extensions.Configuration
 
 @inject HttpClient Http
@@ -30,9 +29,9 @@ Unregistered: @unregistered
             @(context.Registered ? "Yes" : "No")
         </Template>
     </Column>
-    <Column TableItem="Emoji" Title="Last Sale" Field="@(x => x.LastSale)" Sortable="true" Filterable="true" Width="10%" Align="Align.Right">
+    <Column TableItem="Emoji" Title="Last Sale" Field="@(x => x.LastSale)" Sortable="true" Filterable="true" Width="10%" DefaultSortColumn="true" DefaultSortDescending="true" Align="Align.Right">
          <Template>
-            <a href="@Configuration["OpenSea:ENSUrl"]/@context.TokenId">@($"{context.LastSale:N4} ETH")</a>
+            <a href="@Configuration["OpenSea:ENSUrl"]/@context.TokenId">@($"{context.LastSale / Configuration.GetValue<decimal>("EthDivisor"):N4} ETH")</a>
         </Template>
     </Column>
     <Pager ShowPageNumber="true" ShowTotalCount="true" />
@@ -48,6 +47,19 @@ Unregistered: @unregistered
     private decimal total = 0;
     private decimal unregistered = 0;
     private decimal percentage = 0m;
+
+    public class Emoji
+    {
+        public string Codes { get; set; }
+        public string Name { get; set; }
+        public string Group { get; set; }
+        public string Subgroup { get; set; }
+        public string TokenId { get; set; }
+        public bool Registered { get; set; }
+        public decimal LastSale { get; set; }
+        public decimal LastBid { get; set; }
+        public DateTime? AuctionEnd { get; set; }
+    }
 
     protected override async Task OnInitializedAsync()
     {
