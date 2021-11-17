@@ -1,0 +1,68 @@
+﻿@page "/fraudcheck"
+
+@using PuremojiENS.Shared
+@using Nethereum.ABI.Encoders
+@using Nethereum.RLP;
+@using Nethereum.Util;
+@using Microsoft.Extensions.Configuration;
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+
+<PageTitle>Fraud Checker</PageTitle>
+
+<h1>Puremoji Validator</h1>
+
+Protect yourself against scam attempts
+
+<div style="margin-top: 20px; margin-bottom: 20px;">
+    <input class="form-control" placeholder="🐋️🐋️🐋️.eth" @oninput="OnEnsNameChange"/>
+</div>
+<div style="margin-top: 20px; margin-bottom: 20px;">
+    <span style="color: @color">@result</span>
+</div>
+
+@code{
+    private string result;
+    private string color = "#343a40";
+    private Sha3Keccack kecckak = new Nethereum.Util.Sha3Keccack();
+    private string[]? data;
+
+    protected override async Task OnInitializedAsync()
+    {
+        data = await Http.GetFromJsonAsync<string[]>(Configuration["Api:ValidTokenIdsEndpoint"]);
+    }
+
+    private string GetId(string name)
+    {
+        var encode = new StringTypeEncoder().EncodePacked(name);
+        var hash = kecckak.CalculateHash(encode);
+        return hash.ToBigIntegerFromRLPDecoded().ToString();
+    }
+
+    private async Task OnEnsNameChange(ChangeEventArgs e)
+    {
+        var ensName = e?.Value?.ToString();
+
+        if(ensName.Length >= 3)
+        {
+            var tokenId = GetId(ensName.Replace(".eth", ""));
+            var valid = data.Any(x => x.Equals(tokenId));
+            if(valid)
+            {
+                result = "Valid";
+                color = "#20c997";
+            }
+            else
+            {
+                result = "Fraudulent or non-minimal";
+                color = "#dc3545";
+            }
+        }
+        else
+        {
+            result = "";
+            color = "#343a40";
+        }
+    }
+}

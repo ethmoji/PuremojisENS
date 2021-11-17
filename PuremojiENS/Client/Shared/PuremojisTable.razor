@@ -1,0 +1,59 @@
+﻿@using BlazorTable
+@using System.ComponentModel
+@using PuremojiENS.Shared
+@using Microsoft.Extensions.Configuration
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+
+<h3>@Title</h3>
+
+<div>
+Total: @total
+&nbsp;&nbsp;&nbsp;
+Unregistered: @unregistered
+&nbsp;&nbsp;&nbsp;
+(@($"{percentage:N2}") %)
+</div>
+
+<Table TableItem="Emoji" Items="data" PageSize="10" ColumnReorder="true" ShowSearchBar="true">
+    <Column TableItem="Emoji" Title="Name" Field="@(x => x.Name)" Sortable="true" Filterable="true" Width="15%">
+        <Template>
+            <a href="@Configuration["ENS:RegisterUrl"]/@context.Name">@($"{context.Name}.eth")</a>
+        </Template>
+    </Column>
+    <Column TableItem="Emoji" Title="Codes" Field="@(x => x.Codes)" Sortable="true" Filterable="true" Width="25%" />
+    <Column TableItem="Emoji" Title="Group" Field="@(x => x.Group)" Sortable="true" Filterable="true" Width="15%" />
+    <Column TableItem="Emoji" Title="Subgroup" Field="@(x => x.Subgroup)" Sortable="true" Filterable="true" Width="20%" />
+    <Column TableItem="Emoji" Title="Registered" Field="@(x => x.Registered)" Sortable="true" Filterable="true" Width="10%">
+        <Template>
+            @(context.Registered ? "Yes" : "No")
+        </Template>
+    </Column>
+    <Column TableItem="Emoji" Title="Last Sale" Field="@(x => x.LastSale)" Sortable="true" Filterable="true" Width="10%" Align="Align.Right">
+         <Template>
+            <a href="@Configuration["OpenSea:ENSUrl"]/@context.TokenId">@($"{context.LastSale:N4} ETH")</a>
+        </Template>
+    </Column>
+    <Pager ShowPageNumber="true" ShowTotalCount="true" />
+</Table>
+
+@code
+{
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public string Filter { get; set; }
+    private Emoji[]? data;
+    private decimal total = 0;
+    private decimal unregistered = 0;
+    private decimal percentage = 0m;
+
+    protected override async Task OnInitializedAsync()
+    {
+        data = await Http.GetFromJsonAsync<Emoji[]>(Configuration["Api:PuremojisEndpoint"] + Filter);
+        total = data.Length;
+        unregistered = data.Count(x => !x.Registered);
+        percentage = (total - unregistered) / total * 100;
+    }
+}

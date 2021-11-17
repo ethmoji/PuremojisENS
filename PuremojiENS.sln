@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.31903.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuremojiENS.Server", "PuremojiENS\Server\PuremojiENS.Server.csproj", "{8506DFF8-77DD-4828-8354-C138F213CC2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuremojiENS.Server", "PuremojiENS\Server\PuremojiENS.Server.csproj", "{8506DFF8-77DD-4828-8354-C138F213CC2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuremojiENS.Client", "PuremojiENS\Client\PuremojiENS.Client.csproj", "{F454B4D8-F93C-43E2-BB00-71341E9EFA39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuremojiENS.Client", "PuremojiENS\Client\PuremojiENS.Client.csproj", "{F454B4D8-F93C-43E2-BB00-71341E9EFA39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuremojiENS.Shared", "PuremojiENS\Shared\PuremojiENS.Shared.csproj", "{47101BA3-06AC-43A4-9873-6C848BC6468A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuremojiENS.Shared", "PuremojiENS\Shared\PuremojiENS.Shared.csproj", "{47101BA3-06AC-43A4-9873-6C848BC6468A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

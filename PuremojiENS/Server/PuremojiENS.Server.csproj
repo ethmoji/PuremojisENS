@@ -15,5 +15,11 @@
     <ProjectReference Include="..\Shared\PuremojiENS.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="valid_tokenids.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 
 </Project>

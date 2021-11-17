@@ -1,6 +1,7 @@
 *.suo
 *.user
 *.sln.docstates
+.vs
 
 .idea
 appsettings.local.json
