@@ -16,18 +16,18 @@
             <a href="@Configuration["OpenSea:ENSUrl"]/@context.TokenId">@($"{context.Name}.eth")</a>
         </Template>
     </Column>
+    <Column TableItem="Auction" Title="End Date" Field="@(x => x.AuctionEnd)" Sortable="true" DefaultSortColumn="true" Filterable="true" Width="15%" />
+    <Column TableItem="Auction" Title="Last Sale" Field="@(x => x.LastSale)" Sortable="false" Filterable="true" Width="10%" Align="Align.Right">
+        <Template>
+            @($"{decimal.Parse(context.LastSale) / Configuration.GetValue<decimal>("EthDivisor"):N4} ETH")
+        </Template>
+    </Column>
     <Column TableItem="Auction" Title="Codes" Field="@(x => x.Codes)" Filterable="true" Width="25%" />
     <Column TableItem="Auction" Title="Type" Field="@(x => x.Width)" Sortable="true" Filterable="true" Width="15%">
         <Template>
             @(context.Width >= 2 ? (context.Width == 2 ? "Pure Double" : "Pure Single") : "Pure Triple")
         </Template>
     </Column>
-    <Column TableItem="Auction" Title="Last Sale" Field="@(x => x.LastSale)" Sortable="false" Filterable="true" Width="10%" Align="Align.Right">
-         <Template>
-            @($"{decimal.Parse(context.LastSale) / Configuration.GetValue<decimal>("EthDivisor"):N4} ETH")
-        </Template>
-    </Column>
-    
     <Pager ShowPageNumber="true" ShowTotalCount="true" />
 </Table>
 

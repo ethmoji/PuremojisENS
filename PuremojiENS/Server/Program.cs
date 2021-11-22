@@ -21,7 +21,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddTransient<TheGraph>();
 builder.Services.AddTransient<OpenSea>();
 
-builder.Services.AddHostedService<UpdatePuremojis>();
+builder.Services.AddHostedService<UpdateRegistrations>();
+builder.Services.AddHostedService<UpdateOpenSeaData>();
 
 builder.Services.AddEntityFrameworkSqlite()
     .AddDbContext<EmojisDbContext>();

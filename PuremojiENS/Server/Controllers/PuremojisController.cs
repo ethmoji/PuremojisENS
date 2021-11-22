@@ -23,7 +23,6 @@ namespace PuremojiENS.Server.Controllers
             _logger.LogInformation("Puremojis requested");
             
             
-            // Redundant switch cases to save temp memory
             switch (filter)
             {
                 case "triples":

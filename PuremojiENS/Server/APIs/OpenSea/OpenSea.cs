@@ -60,21 +60,21 @@ namespace PuremojiENS.Server.APIs.OpenSea
             return null;
         }
 
-        public async Task<EventsResponse> GetEvents(int minutesBack)
-        {
-            var url = $"{_config.APIs.OpenSea.EventsEndpoint}&occurred_after={DateTimeOffset.Now.AddMinutes(-minutesBack).ToUnixTimeSeconds()}";
-            var request = new HttpRequestMessage(new HttpMethod("GET"), url);
+        //public async Task<EventsResponse> GetEvents(int minutesBack)
+        //{
+        //    var url = $"{_config.APIs.OpenSea.EventsEndpoint}&occurred_after={DateTimeOffset.Now.AddMinutes(-minutesBack).ToUnixTimeSeconds()}";
+        //    var request = new HttpRequestMessage(new HttpMethod("GET"), url);
 
-            var response = await _httpClient.SendAsync(request);
+        //    var response = await _httpClient.SendAsync(request);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var jsonString = await response.Content.ReadAsStringAsync();
-                var events = JsonConvert.DeserializeObject<EventsResponse>(jsonString);
-                return events;
-            }
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        var jsonString = await response.Content.ReadAsStringAsync();
+        //        var events = JsonConvert.DeserializeObject<EventsResponse>(jsonString);
+        //        return events;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
     }
 }

@@ -21,17 +21,17 @@ Unregistered: @unregistered
             <a href="@Configuration["ENS:RegisterUrl"]/@context.Name">@($"{context.Name}.eth")</a>
         </Template>
     </Column>
+    <Column TableItem="Emoji" Title="Last Sale" Field="@(x => x.LastSale)" Sortable="true" Filterable="true" Width="10%" DefaultSortColumn="true" DefaultSortDescending="true" Align="Align.Right">
+         <Template>
+            <a href="@Configuration["OpenSea:ENSUrl"]/@context.TokenId">@($"{context.LastSale / Configuration.GetValue<decimal>("EthDivisor"):N4} ETH")</a>
+        </Template>
+    </Column>
     <Column TableItem="Emoji" Title="Codes" Field="@(x => x.Codes)" Sortable="true" Filterable="true" Width="25%" />
     <Column TableItem="Emoji" Title="Group" Field="@(x => x.Group)" Sortable="true" Filterable="true" Width="15%" />
     <Column TableItem="Emoji" Title="Subgroup" Field="@(x => x.Subgroup)" Sortable="true" Filterable="true" Width="20%" />
     <Column TableItem="Emoji" Title="Registered" Field="@(x => x.Registered)" Sortable="true" Filterable="true" Width="10%">
         <Template>
             @(context.Registered ? "Yes" : "No")
-        </Template>
-    </Column>
-    <Column TableItem="Emoji" Title="Last Sale" Field="@(x => x.LastSale)" Sortable="true" Filterable="true" Width="10%" DefaultSortColumn="true" DefaultSortDescending="true" Align="Align.Right">
-         <Template>
-            <a href="@Configuration["OpenSea:ENSUrl"]/@context.TokenId">@($"{context.LastSale / Configuration.GetValue<decimal>("EthDivisor"):N4} ETH")</a>
         </Template>
     </Column>
     <Pager ShowPageNumber="true" ShowTotalCount="true" />
